@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.teamcode.nextftc.NextFtcLinearOpMode
+import org.firstinspires.ftc.teamcode.nextftc.get
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.max
@@ -25,11 +26,11 @@ class MecanumDriveTeleOp : NextFtcLinearOpMode() {
     private lateinit var imu: IMU
 
     override fun onInit() {
-        frontLeft = hardwareMap.get(DcMotor::class.java, "frontLeft")
-        frontRight = hardwareMap.get(DcMotor::class.java, "frontRight")
-        backLeft = hardwareMap.get(DcMotor::class.java, "backLeft")
-        backRight = hardwareMap.get(DcMotor::class.java, "backRight")
-        imu = hardwareMap.get(IMU::class.java, "imu")
+        frontLeft = hardwareMap.get("frontLeft")
+        frontRight = hardwareMap.get("frontRight")
+        backLeft = hardwareMap.get("backLeft")
+        backRight = hardwareMap.get("backRight")
+        imu = hardwareMap.get("imu")
 
         imu.initialize(
             IMU.Parameters(
