@@ -3,11 +3,11 @@ package org.firstinspires.ftc.teamcode
 import com.qualcomm.hardware.rev.IMU
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import com.qualcomm.robotcore.hardware.DcMotor
-import com.qualcomm.robotcore.hardware.DcMotorSimple
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.teamcode.nextftc.NextFtcLinearOpMode
 import org.firstinspires.ftc.teamcode.nextftc.get
+import org.firstinspires.ftc.teamcode.nextftc.motor
+import org.firstinspires.ftc.teamcode.nextftc.MotorEx
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.max
@@ -19,17 +19,17 @@ import kotlin.math.sin
  */
 @TeleOp(name = "Mecanum Drive", group = "Drive")
 class MecanumDriveTeleOp : NextFtcLinearOpMode() {
-    private lateinit var frontLeft: DcMotor
-    private lateinit var frontRight: DcMotor
-    private lateinit var backLeft: DcMotor
-    private lateinit var backRight: DcMotor
+    private lateinit var frontLeft: MotorEx
+    private lateinit var frontRight: MotorEx
+    private lateinit var backLeft: MotorEx
+    private lateinit var backRight: MotorEx
     private lateinit var imu: IMU
 
     override fun onInit() {
-        frontLeft = hardwareMap.get("frontLeft")
-        frontRight = hardwareMap.get("frontRight")
-        backLeft = hardwareMap.get("backLeft")
-        backRight = hardwareMap.get("backRight")
+        frontLeft = hardwareMap.motor("frontLeft")
+        frontRight = hardwareMap.motor("frontRight")
+        backLeft = hardwareMap.motor("backLeft")
+        backRight = hardwareMap.motor("backRight")
         imu = hardwareMap.get("imu")
 
         imu.initialize(
@@ -41,13 +41,13 @@ class MecanumDriveTeleOp : NextFtcLinearOpMode() {
             )
         )
 
-        frontLeft.direction = DcMotorSimple.Direction.FORWARD
-        backLeft.direction = DcMotorSimple.Direction.FORWARD
-        frontRight.direction = DcMotorSimple.Direction.REVERSE
-        backRight.direction = DcMotorSimple.Direction.REVERSE
+        frontLeft.direction = MotorEx.Direction.FORWARD
+        backLeft.direction = MotorEx.Direction.FORWARD
+        frontRight.direction = MotorEx.Direction.REVERSE
+        backRight.direction = MotorEx.Direction.REVERSE
 
         listOf(frontLeft, frontRight, backLeft, backRight).forEach {
-            it.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+            it.zeroPowerBehavior = MotorEx.ZeroPowerBehavior.BRAKE
             it.power = 0.0
         }
 

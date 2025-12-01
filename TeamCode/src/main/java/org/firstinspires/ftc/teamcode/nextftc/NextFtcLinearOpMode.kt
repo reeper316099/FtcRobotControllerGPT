@@ -40,6 +40,7 @@ abstract class NextFtcLinearOpMode : LinearOpMode() {
         onStart()
         while (opModeIsActive()) {
             onUpdate()
+            idle()
         }
 
         onStop()
