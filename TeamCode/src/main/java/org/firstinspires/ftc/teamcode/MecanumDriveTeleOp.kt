@@ -18,12 +18,18 @@ import kotlin.math.sin
  */
 @TeleOp(name = "Mecanum Drive", group = "Drive")
 class MecanumDriveTeleOp : NextFtcLinearOpMode() {
-    override fun runOpMode() {
-        val frontLeft = hardwareMap.get(DcMotor::class.java, "frontLeft")
-        val frontRight = hardwareMap.get(DcMotor::class.java, "frontRight")
-        val backLeft = hardwareMap.get(DcMotor::class.java, "backLeft")
-        val backRight = hardwareMap.get(DcMotor::class.java, "backRight")
-        val imu = hardwareMap.get(IMU::class.java, "imu")
+    private lateinit var frontLeft: DcMotor
+    private lateinit var frontRight: DcMotor
+    private lateinit var backLeft: DcMotor
+    private lateinit var backRight: DcMotor
+    private lateinit var imu: IMU
+
+    override fun onInit() {
+        frontLeft = hardwareMap.get(DcMotor::class.java, "frontLeft")
+        frontRight = hardwareMap.get(DcMotor::class.java, "frontRight")
+        backLeft = hardwareMap.get(DcMotor::class.java, "backLeft")
+        backRight = hardwareMap.get(DcMotor::class.java, "backRight")
+        imu = hardwareMap.get(IMU::class.java, "imu")
 
         imu.initialize(
             IMU.Parameters(
@@ -39,43 +45,50 @@ class MecanumDriveTeleOp : NextFtcLinearOpMode() {
         frontRight.direction = DcMotorSimple.Direction.REVERSE
         backRight.direction = DcMotorSimple.Direction.REVERSE
 
-        frontLeft.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
-        frontRight.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
-        backLeft.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
-        backRight.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+        listOf(frontLeft, frontRight, backLeft, backRight).forEach {
+            it.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+            it.power = 0.0
+        }
 
         telemetry.addLine("Initialized mecanum drive with NextFTC helpers")
         telemetry.update()
+    }
 
-        if (!waitForStartOrStop()) return
+    override fun onStart() {
+        telemetry.addLine("Starting field-centric control")
+        telemetry.update()
+    }
 
-        runWhileActive {
-            val y = -gamepad1.left_stick_y.toDouble()
-            val x = gamepad1.left_stick_x.toDouble()
-            val rx = gamepad1.right_stick_x.toDouble()
+    override fun onUpdate() {
+        val y = -gamepad1.left_stick_y.toDouble()
+        val x = gamepad1.left_stick_x.toDouble()
+        val rx = gamepad1.right_stick_x.toDouble()
 
-            val botHeading = imu.robotYawPitchRollAngles.getYaw(AngleUnit.RADIANS)
+        val botHeading = imu.robotYawPitchRollAngles.getYaw(AngleUnit.RADIANS)
 
-            val rotX = x * cos(-botHeading) - y * sin(-botHeading)
-            val rotY = x * sin(-botHeading) + y * cos(-botHeading)
+        val rotX = x * cos(-botHeading) - y * sin(-botHeading)
+        val rotY = x * sin(-botHeading) + y * cos(-botHeading)
 
-            val denominator = max(abs(rotY) + abs(rotX) + abs(rx), 1.0)
-            val frontLeftPower = (rotY + rotX + rx) / denominator
-            val backLeftPower = (rotY - rotX + rx) / denominator
-            val frontRightPower = (rotY - rotX - rx) / denominator
-            val backRightPower = (rotY + rotX - rx) / denominator
+        val denominator = max(abs(rotY) + abs(rotX) + abs(rx), 1.0)
+        val frontLeftPower = (rotY + rotX + rx) / denominator
+        val backLeftPower = (rotY - rotX + rx) / denominator
+        val frontRightPower = (rotY - rotX - rx) / denominator
+        val backRightPower = (rotY + rotX - rx) / denominator
 
-            frontLeft.power = frontLeftPower
-            backLeft.power = backLeftPower
-            frontRight.power = frontRightPower
-            backRight.power = backRightPower
+        frontLeft.power = frontLeftPower
+        backLeft.power = backLeftPower
+        frontRight.power = frontRightPower
+        backRight.power = backRightPower
 
-            telemetry.addData("Front Left", frontLeftPower)
-            telemetry.addData("Front Right", frontRightPower)
-            telemetry.addData("Back Left", backLeftPower)
-            telemetry.addData("Back Right", backRightPower)
-            telemetry.addData("Heading (deg)", imu.robotYawPitchRollAngles.getYaw(AngleUnit.DEGREES))
-            telemetry.update()
-        }
+        telemetry.addData("Front Left", frontLeftPower)
+        telemetry.addData("Front Right", frontRightPower)
+        telemetry.addData("Back Left", backLeftPower)
+        telemetry.addData("Back Right", backRightPower)
+        telemetry.addData("Heading (deg)", imu.robotYawPitchRollAngles.getYaw(AngleUnit.DEGREES))
+        telemetry.update()
+    }
+
+    override fun onStop() {
+        listOf(frontLeft, frontRight, backLeft, backRight).forEach { it.power = 0.0 }
     }
 }
